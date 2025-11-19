@@ -22,7 +22,7 @@
   align-items: center;
   padding: 15px 30px;
   background-color: var(--color-bg-secondary);
-  border-bottom: 3px solid var(--color-accent-blue); /* Subtle accent line */
+  border-bottom: 3px solid var(--color-accent-blue);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -47,7 +47,7 @@ nav a:hover {
 }
 
 .active-link {
-  color: var(--color-text-primary) !important;
+  color: white !important;
   background-color: var(--color-accent-blue) !important;
   font-weight: bold;
 }

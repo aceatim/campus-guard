@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import CameraFeed from "../components/CameraFeed.vue"; // Your existing component
-import AlertDashboard from "../views/AlertDashboard.vue"; // Component to create next
+import CameraFeed from "../components/CameraFeed.vue";
+import AlertDashboard from "../views/AlertDashboard.vue";
 
 const router = createRouter({
   history: createWebHistory(),

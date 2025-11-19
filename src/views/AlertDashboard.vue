@@ -85,9 +85,6 @@ const unacknowledgedCount = computed(() => {
   return alerts.value.filter((a) => a.status === "Unacknowledged").length;
 });
 
-/**
- * Fetches the alert log from the backend API.
- */
 async function fetchAlerts() {
   try {
     const response = await fetch(BACKEND_URL);
@@ -95,26 +92,17 @@ async function fetchAlerts() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    // Assuming the backend returns the latest alerts first
     alerts.value = data;
   } catch (error) {
     console.error("Failed to fetch alerts:", error);
-    // You could set a reactive error message here
   }
 }
 
-/**
- * Starts the periodic data fetching.
- */
 function startPolling() {
-  // Fetch immediately, then set up the interval
   fetchAlerts();
-  pollInterval = setInterval(fetchAlerts, 5000); // Poll every 5 seconds
+  pollInterval = setInterval(fetchAlerts, 5000);
 }
 
-/**
- * Stops the periodic data fetching.
- */
 function stopPolling() {
   if (pollInterval) {
     clearInterval(pollInterval);
@@ -123,10 +111,8 @@ function stopPolling() {
   }
 }
 
-/**
- * Helper to format the ISO timestamp.
- */
 function formatTimestamp(isoString) {
+  if (!isoString) return "N/A";
   return new Date(isoString).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
@@ -135,27 +121,13 @@ function formatTimestamp(isoString) {
   });
 }
 
-// --- Lifecycle Hooks ---
-onMounted(() => {
-  startPolling();
-});
-
-onUnmounted(() => {
-  stopPolling(); // Crucial to prevent memory leaks when leaving the component
-});
-
-/**
- * Sends a request to the backend to mark an alert as acknowledged.
- */
 async function acknowledgeAlert(id) {
   try {
-    // Send POST request to backend
     const response = await fetch(`${ACKNOWLEDGE_URL}/${id}`, {
       method: "POST",
     });
 
     if (response.ok) {
-      // Optimistic UI update: update the local state immediately
       const index = alerts.value.findIndex((a) => a.id === id);
       if (index !== -1) {
         alerts.value[index].status = "Acknowledged";
@@ -167,6 +139,14 @@ async function acknowledgeAlert(id) {
     console.error("Network error acknowledging alert:", error);
   }
 }
+
+onMounted(() => {
+  startPolling();
+});
+
+onUnmounted(() => {
+  stopPolling();
+});
 </script>
 
 <style scoped>
@@ -176,11 +156,10 @@ async function acknowledgeAlert(id) {
   gap: 20px;
 }
 .log-area {
-  grid-column: 1 / span 3; /* Table spans all columns */
-  padding: 0; /* Card padding is inside the .card class */
+  grid-column: 1 / span 3;
+  padding: 0;
 }
 
-/* Stat Cards */
 .stat-card {
   padding: 25px;
   text-align: center;
@@ -201,13 +180,12 @@ async function acknowledgeAlert(id) {
 }
 
 .active-text {
-  color: var(--color-accent-blue);
+  color: var(--color-success-green);
 }
 .inactive-text {
   color: var(--color-alert-red);
 }
 
-/* Table Styling */
 .alert-table {
   width: 100%;
   border-collapse: collapse;
@@ -215,18 +193,17 @@ async function acknowledgeAlert(id) {
 .alert-table th,
 .alert-table td {
   padding: 15px;
-  border-bottom: 1px solid var(--color-bg-primary); /* Use primary BG color for lines */
+  border-bottom: 1px solid var(--color-bg-primary);
   background-color: var(--color-bg-secondary);
 }
 .alert-table th {
-  background-color: var(--color-bg-primary); /* Darker header */
+  background-color: var(--color-bg-primary);
   color: var(--color-accent-blue);
   text-transform: uppercase;
   font-weight: 500;
   font-size: 0.9em;
 }
 
-/* Critical Alert Row Visuals */
 .critical-row {
   background-color: var(--color-alert-bg) !important;
   color: var(--color-text-primary);
@@ -241,7 +218,6 @@ async function acknowledgeAlert(id) {
   }
 }
 
-/* Status Badges (Pills) */
 .status-badge {
   padding: 4px 10px;
   border-radius: 12px;
@@ -254,11 +230,10 @@ async function acknowledgeAlert(id) {
   color: white;
 }
 .badge-acknowledged {
-  background-color: #4a5568; /* Gray background */
+  background-color: #4a5568;
   color: var(--color-text-primary);
 }
 
-/* Action Buttons */
 .btn-acknowledge {
   background-color: var(--color-accent-blue);
   color: white;
@@ -286,11 +261,6 @@ async function acknowledgeAlert(id) {
 }
 .refresh-icon {
   display: inline-block;
-  animation: spin 2s linear infinite; /* Subtle animation for visual feedback */
-  animation-play-state: paused;
-}
-.btn-refresh:hover .refresh-icon {
-  animation-play-state: running;
 }
 
 .no-alerts {

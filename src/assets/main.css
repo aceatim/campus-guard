@@ -1,37 +1,34 @@
-/* src/style.css (or main.css) */
-
 /* Global Variables for Dark Mode */
 :root {
-  --color-bg-primary: #1a202c; /* Deep Navy/Black */
-  --color-bg-secondary: #2d3748; /* Darker Card Background */
-  --color-text-primary: #e2e8f0; /* Off-White Text */
-  --color-text-secondary: #a0aec0; /* Lighter Gray Text */
+  --color-bg-primary: #1a202c;
+  --color-bg-secondary: #2d3748;
+  --color-text-primary: #e2e8f0;
+  --color-text-secondary: #a0aec0;
   --color-accent-blue: #3b82f6;
   --color-alert-red: #ef4444;
-  --color-alert-bg: #451a1a; /* Dark Red Background for Critical Rows */
+  --color-alert-bg: #451a1a;
+  --color-success-green: #10b981;
 }
 
 /* Base Body Styles */
 body {
   margin: 0;
   padding: 0;
-  font-family: "Roboto", sans-serif; /* Recommended clean font */
+  font-family: "Roboto", sans-serif;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   line-height: 1.6;
 }
 
-/* Clean slate for anchors */
 a {
   color: var(--color-accent-blue);
   text-decoration: none;
 }
 
 a:hover {
-  color: #60a5fa; /* Lighter blue on hover */
+  color: #60a5fa;
 }
 
-/* General Card Style (used for controls, stats, etc.) */
 .card {
   background-color: var(--color-bg-secondary);
   border-radius: 8px;
@@ -47,7 +44,6 @@ h3 {
   padding-bottom: 5px;
 }
 
-/* Custom Slider for better visual feedback */
 input[type="range"].slider-blue {
   width: 100%;
   height: 8px;
@@ -66,4 +62,48 @@ input[type="range"].slider-blue::-webkit-slider-thumb {
   border-radius: 50%;
   background: var(--color-accent-blue);
   cursor: pointer;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-save {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+  transition: background-color 0.3s;
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background-color: var(--color-accent-blue);
+  color: white;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: #60a5fa;
+}
+
+.btn-secondary {
+  background-color: #4a5568;
+  color: white;
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: #718096;
+}
+
+.btn-save {
+  background-color: var(--color-success-green);
+  color: white;
+  margin-top: 10px;
+}
+.btn-save:hover:not(:disabled) {
+  background-color: #34d399;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
