@@ -100,6 +100,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import * as tf from "@tensorflow/tfjs";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 
+// --- State Variables ---
 const videoRef = ref(null);
 const canvasRef = ref(null);
 const isRiskDetected = ref(false);
@@ -114,24 +115,49 @@ let lastAlertTimestamp = 0;
 const THROTTLE_TIME = 15000;
 const BACKEND_ALERT_URL = "http://localhost:3000/api/alert";
 
+// --- Functional Methods ---
+
+/**
+ * FIXED: Starts the camera, ensuring the video is ready to play before resolving.
+ */
 async function startCamera() {
   cameraError.value = "";
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "user" },
     });
-    videoRef.value.srcObject = stream;
-    hasCameraStarted.value = true;
 
+    videoRef.value.srcObject = stream;
+
+    // Use oncanplay to ensure the video has loaded enough data to begin playback
     await new Promise((resolve) => {
-      videoRef.value.onloadedmetadata = () => {
+      const video = videoRef.value;
+
+      video.oncanplay = () => {
+        // 1. Set canvas size now that video dimensions are available
         if (canvasRef.value) {
-          canvasRef.value.width = videoRef.value.videoWidth;
-          canvasRef.value.height = videoRef.value.videoHeight;
+          canvasRef.value.width = video.videoWidth;
+          canvasRef.value.height = video.videoHeight;
         }
-        resolve();
+
+        // 2. Start playback (essential for browser policies)
+        video
+          .play()
+          .then(() => {
+            resolve();
+          })
+          .catch((e) => {
+            // Resolve even if play fails (e.g., policy block) to continue component flow
+            console.error("Video playback failed on start (policy block?):", e);
+            resolve();
+          });
       };
+
+      // Safety timeout in case oncanplay never fires (resolves after 3s)
+      setTimeout(() => resolve(), 3000);
     });
+
+    hasCameraStarted.value = true;
   } catch (err) {
     cameraError.value = "Failed to access camera. Check permissions.";
     console.error("Camera access error:", err);
@@ -139,24 +165,41 @@ async function startCamera() {
   }
 }
 
-function saveCriticalLine() {
-  localStorage.setItem(CRITICAL_Y_KEY, criticalY.value.toString());
-  alert(`Critical Line Threshold saved at Y: ${criticalY.value}`);
-}
-
+/**
+ * FIXED: Aggressively stops all media tracks to guarantee resource release.
+ */
 function resetCamera() {
+  // 1. Stop the detection loop flag
   isModelLoaded.value = false;
 
+  // 2. Aggressively stop all media stream tracks
   if (videoRef.value && videoRef.value.srcObject) {
-    videoRef.value.srcObject.getTracks().forEach((track) => track.stop());
-  }
-  videoRef.value.srcObject = null;
-  hasCameraStarted.value = false;
+    const stream = videoRef.value.srcObject;
 
+    // Iterate over ALL track types and stop them
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+
+    // 3. Nullify the source to break the connection
+    videoRef.value.srcObject = null;
+  }
+
+  // 4. Reset the component flags
+  hasCameraStarted.value = false;
+  isRiskDetected.value = false;
+  cameraError.value = "";
+
+  // 5. Clear canvas
   if (canvasRef.value) {
     const ctx = canvasRef.value.getContext("2d");
     ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height);
   }
+}
+
+function saveCriticalLine() {
+  localStorage.setItem(CRITICAL_Y_KEY, criticalY.value.toString());
+  alert(`Critical Line Threshold saved at Y: ${criticalY.value}`);
 }
 
 async function loadAndStartMonitoring() {
@@ -270,7 +313,15 @@ function drawKeypointsAndLine(ctx, keypoints, yLine) {
     });
 }
 
+// --- Lifecycle Hooks ---
+onMounted(() => {
+  // Ensure flags are reset when component is mounted/remounted
+  isModelLoaded.value = false;
+  hasCameraStarted.value = false;
+});
+
 onUnmounted(() => {
+  // CRITICAL: Stop resources when leaving the view
   resetCamera();
 });
 </script>
@@ -278,20 +329,20 @@ onUnmounted(() => {
 <style scoped>
 .camera-layout {
   display: flex;
-  flex-direction: column; /* Stacks children vertically */
+  flex-direction: column;
   gap: 20px;
-  align-items: center; /* Centers the whole block on the page */
+  align-items: center;
 }
 
 .controls-and-status-area {
-  display: flex; /* Makes the cards sit side-by-side */
+  display: flex;
   gap: 20px;
-  width: 800px; /* IMPORTANT: Match this width to the .camera-monitor width */
+  width: 800px;
+  justify-content: space-between;
 }
 
 .camera-monitor {
   position: relative;
-  /* Use the larger dimensions requested previously */
   width: 800px;
   height: 600px;
   border: 4px solid var(--color-bg-secondary);
@@ -306,10 +357,9 @@ canvas {
   transform: scaleX(-1);
 }
 
-.control-panel {
-  /* This class will now be used inside controls-and-status-area */
-  flex: 1; /* Allows the control cards to share the space equally */
-  min-width: 380px; /* Ensures controls don't get too squeezed */
+.control-card {
+  flex: 1;
+  min-width: 380px;
 }
 
 .critical-alert {
