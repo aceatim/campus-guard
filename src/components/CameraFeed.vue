@@ -113,9 +113,7 @@ const CRITICAL_Y_KEY = "campusguard_critical_y";
 const criticalY = ref(parseInt(localStorage.getItem(CRITICAL_Y_KEY) || 300));
 let lastAlertTimestamp = 0;
 const THROTTLE_TIME = 15000;
-const BACKEND_ALERT_URL = "api/alert.js";
-const BACKEND_URL = "/api/alerts.js";
-const ACKNOWLEDGE_URL = "/api/acknowledge.js";
+const BACKEND_ALERT_URL = "api/alert";
 
 // --- Functional Methods ---
 
@@ -257,43 +255,60 @@ async function sendAlert(data) {
 async function detectionLoop() {
   const video = videoRef.value;
   const canvas = canvasRef.value;
+
+  // 🛡️ CRITICAL GUARD CLAUSE
+  // If the component has unmounted (canvas is null) OR
+  // if the model/camera flags are false, stop the loop immediately.
+  if (!video || !canvas || !isModelLoaded.value || !hasCameraStarted.value) {
+    return;
+  }
+
   const ctx = canvas.getContext("2d");
 
-  if (!isModelLoaded.value || !hasCameraStarted.value) return;
-
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    // 1. Draw the current video frame onto the canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     if (detector) {
-      const poses = await detector.estimatePoses(canvas);
+      try {
+        // 2. Run Pose Estimation
+        const poses = await detector.estimatePoses(canvas);
 
-      if (poses.length > 0) {
-        const keypoints = poses[0].keypoints;
+        if (poses.length > 0) {
+          const keypoints = poses[0].keypoints;
 
-        const footKeypoints = keypoints.filter(
-          (kp) =>
-            (kp.name.includes("ankle") || kp.name.includes("foot_index")) &&
-            kp.score > 0.3
-        );
+          // 3. Filter for foot/ankle keypoints to check against the danger line
+          const footKeypoints = keypoints.filter(
+            (kp) =>
+              (kp.name.includes("ankle") || kp.name.includes("foot_index")) &&
+              kp.score > 0.3
+          );
 
-        const isClimbing =
-          footKeypoints.length > 0 &&
-          footKeypoints.every((kp) => kp.y < criticalY.value);
+          // 4. Risk Logic: True if detected feet are ABOVE the critical Y line
+          const isClimbing =
+            footKeypoints.length > 0 &&
+            footKeypoints.every((kp) => kp.y < criticalY.value);
 
-        isRiskDetected.value = isClimbing;
+          isRiskDetected.value = isClimbing;
 
-        if (isClimbing) {
-          sendAlert({
-            location: "Camera 1 - Hallway Railing",
-            riskType: "Climbing/High-Risk Elevation",
-          });
+          if (isClimbing) {
+            sendAlert({
+              location: "Camera 1 - Hallway Railing",
+              riskType: "Climbing/High-Risk Elevation",
+            });
+          }
+
+          // 5. Visualization
+          drawKeypointsAndLine(ctx, keypoints, criticalY.value);
         }
-
-        drawKeypointsAndLine(ctx, keypoints, criticalY.value);
+      } catch (error) {
+        // Catch intermittent TF.js errors during unmounting
+        console.warn("Pose detection skipped:", error);
       }
     }
   }
 
+  // 6. Loop
   requestAnimationFrame(detectionLoop);
 }
 
