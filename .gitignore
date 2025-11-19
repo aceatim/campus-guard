@@ -34,3 +34,12 @@ coverage
 
 # Vitest
 __screenshots__/
+
+# 1. Environment Variables File (Crucial for storing MONGODB_URI locally)
+.env
+.env.*
+!.env.production* # Keep these if you need to commit non-secret production defaults
+!.env.staging*
+
+# 2. Vercel Deployment Output Files (often includes build cache)
+.vercel/

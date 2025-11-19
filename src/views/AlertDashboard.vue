@@ -78,8 +78,9 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 const alerts = ref([]);
 const isPolling = ref(true);
 let pollInterval = null;
-const BACKEND_URL = "http://localhost:3000/api/alerts";
-const ACKNOWLEDGE_URL = "http://localhost:3000/api/acknowledge";
+const BACKEND_ALERT_URL = "api/alert.js";
+const BACKEND_URL = "/api/alerts.js";
+const ACKNOWLEDGE_URL = "/api/acknowledge.js";
 
 const unacknowledgedCount = computed(() => {
   return alerts.value.filter((a) => a.status === "Unacknowledged").length;

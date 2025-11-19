@@ -113,7 +113,9 @@ const CRITICAL_Y_KEY = "campusguard_critical_y";
 const criticalY = ref(parseInt(localStorage.getItem(CRITICAL_Y_KEY) || 300));
 let lastAlertTimestamp = 0;
 const THROTTLE_TIME = 15000;
-const BACKEND_ALERT_URL = "http://localhost:3000/api/alert";
+const BACKEND_ALERT_URL = "api/alert.js";
+const BACKEND_URL = "/api/alerts.js";
+const ACKNOWLEDGE_URL = "/api/acknowledge.js";
 
 // --- Functional Methods ---
 
