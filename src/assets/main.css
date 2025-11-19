@@ -1,0 +1,69 @@
+/* src/style.css (or main.css) */
+
+/* Global Variables for Dark Mode */
+:root {
+  --color-bg-primary: #1a202c; /* Deep Navy/Black */
+  --color-bg-secondary: #2d3748; /* Darker Card Background */
+  --color-text-primary: #e2e8f0; /* Off-White Text */
+  --color-text-secondary: #a0aec0; /* Lighter Gray Text */
+  --color-accent-blue: #3b82f6;
+  --color-alert-red: #ef4444;
+  --color-alert-bg: #451a1a; /* Dark Red Background for Critical Rows */
+}
+
+/* Base Body Styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto", sans-serif; /* Recommended clean font */
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+/* Clean slate for anchors */
+a {
+  color: var(--color-accent-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  color: #60a5fa; /* Lighter blue on hover */
+}
+
+/* General Card Style (used for controls, stats, etc.) */
+.card {
+  background-color: var(--color-bg-secondary);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+}
+
+h2,
+h3 {
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-bg-secondary);
+  padding-bottom: 5px;
+}
+
+/* Custom Slider for better visual feedback */
+input[type="range"].slider-blue {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-primary);
+  border-radius: 4px;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.15s ease-in-out;
+}
+
+input[type="range"].slider-blue::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent-blue);
+  cursor: pointer;
+}
