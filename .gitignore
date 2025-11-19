@@ -43,3 +43,5 @@ __screenshots__/
 
 # 2. Vercel Deployment Output Files (often includes build cache)
 .vercel/
+
+package-lock.json
