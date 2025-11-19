@@ -12,8 +12,23 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/assets/(.*)",
+      "dest": "/dist/assets/$1",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/api/alerts",
+      "dest": "/api/alerts.js"
+    },
+    {
+      "src": "/api/acknowledge/(.*)",
+      "dest": "/api/acknowledge.js"
+    },
+    {
+      "src": "/api/alert",
+      "dest": "/api/alert.js"
     },
     {
       "src": "/(.*)",
