@@ -9,6 +9,7 @@ module.exports = async (req, res) => {
 
   // The alert ID is passed in the URL path (e.g., /api/acknowledge/60e...)
   // Vercel routes often expose the path segments.
+
   const pathSegments = req.url.split("/").filter((s) => s.length > 0);
   const alertId = pathSegments[pathSegments.length - 1];
 

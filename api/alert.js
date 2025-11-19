@@ -1,9 +1,14 @@
-// api/alert.js (Handles POST /api/alert)
+// api/alert.js
 const { connectToDatabase } = require("./db");
 
 module.exports = async (req, res) => {
+  // Handle CORS Preflight (Optional but recommended for safety)
+  if (req.method === "OPTIONS") {
+    return res.status(200).send("OK");
+  }
+
   if (req.method !== "POST") {
-    return res.status(405).send("Method Not Allowed");
+    return res.status(405).json({ message: "Method Not Allowed" });
   }
 
   const { location, riskType } = req.body;
@@ -21,10 +26,10 @@ module.exports = async (req, res) => {
 
     await alertsCollection.insertOne(newAlert);
 
-    // 201 Created status
     res.status(201).json({ message: "Alert recorded" });
   } catch (error) {
     console.error("MongoDB Error:", error);
-    res.status(500).json({ message: "Database error" });
+    // Return JSON error, not HTML
+    res.status(500).json({ message: "Database error", error: error.message });
   }
 };
